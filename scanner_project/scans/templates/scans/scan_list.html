@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Scans{% endblock %}
+
+{% block content %}
+  <div class="container mx-auto p-6">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">Scans</h1>
+      <!-- Button to open the modal -->
+      <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" onclick="openModal()">New Scan</button>
+    </div>
+
+        <!-- Modal -->
+    <div id="newScanModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold mb-4">New Scan</h2>
+        <form id="newScanForm" method="post" action="{% url 'start_scan' %}">
+          {% csrf_token %}
+          <label for="target" class="block mb-2">Target URL:</label>
+          <input type="text" name="target" id="target" required class="w-full border border-gray-300 p-2 rounded mb-4" placeholder="https://example.com">
+          <div class="flex justify-end gap-2">
+            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Start Scan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Table Section -->
+    <div class="overflow-x-auto mb-6">
+      <table class="min-w-full bg-white shadow rounded-lg">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-4 py-2 text-left">Target</th>
+            <th class="px-4 py-2 text-left">Scan Type</th>
+            <th class="px-4 py-2 text-left">Schedule</th>
+            <th class="px-4 py-2 text-left">Vulnerabilities</th>
+            <th class="px-4 py-2 text-left">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in scans %}
+            <tr class="border-t">
+              <td class="px-4 py-2">{{ scan.target }}</td>
+              <td class="px-4 py-2">{{ scan.scan_type }}</td>
+              <td class="px-4 py-2">{{ scan.schedule }}</td>
+              <td class="px-4 py-2">
+                <div class="flex gap-1">
+                  <span class="badge bg-red-500">{{ scan.vulnerabilities.critical }}</span>
+                  <span class="badge bg-orange-400">{{ scan.vulnerabilities.high }}</span>
+                  <span class="badge bg-yellow-400">{{ scan.vulnerabilities.medium }}</span>
+                  <span class="badge bg-blue-400">{{ scan.vulnerabilities.low }}</span>
+                  <span class="badge bg-green-500">{{ scan.vulnerabilities.info }}</span>
+                </div>
+              </td>
+              <td class="px-4 py-2">{{ scan.status }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Action Buttons Section -->
+    <div class="flex justify-between mb-4">
+      <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Stop Scans</button>
+      <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Delete Scans</button>
+      <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Generate Report</button>
+    </div>
+
+  </div>
+
+<script>
+  function openModal() {
+    document.getElementById('newScanModal').classList.remove('hidden');
+  }
+
+  function closeModal() {
+    document.getElementById('newScanModal').classList.add('hidden');
+  }
+</script>
+{% endblock %}
