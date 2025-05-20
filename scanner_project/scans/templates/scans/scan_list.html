@@ -3,32 +3,43 @@
 {% block title %}Scans{% endblock %}
 
 {% block content %}
-  <div class="container mx-auto p-6">
+<div class="container mx-auto p-6">
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-bold">Scans</h1>
-      <!-- Button to open the modal -->
-      <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" onclick="openModal()">New Scan</button>
+  <!-- Flash messages -->
+  {% if messages %}
+    <div class="mb-4">
+      {% for message in messages %}
+        <div class="p-3 bg-green-100 text-green-800 rounded shadow">
+          {{ message }}
+        </div>
+      {% endfor %}
     </div>
+  {% endif %}
 
-        <!-- Modal -->
-    <div id="newScanModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 class="text-xl font-bold mb-4">New Scan</h2>
-        <form id="newScanForm" method="post" action="{% url 'start_scan' %}">
-          {% csrf_token %}
-          <label for="target" class="block mb-2">Target URL:</label>
-          <input type="text" name="target" id="target" required class="w-full border border-gray-300 p-2 rounded mb-4" placeholder="https://example.com">
-          <div class="flex justify-end gap-2">
-            <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Start Scan</button>
-          </div>
-        </form>
-      </div>
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold">Scans</h1>
+    <button class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded" onclick="openModal()">New Scan</button>
+  </div>
+
+  <!-- Modal -->
+  <div id="newScanModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden z-50">
+    <div class="bg-white rounded-lg p-6 w-full max-w-md">
+      <h2 class="text-xl font-bold mb-4">New Scan</h2>
+      <form id="newScanForm" method="post" action="{% url 'start_scan' %}">
+        {% csrf_token %}
+        <label for="target" class="block mb-2">Target URL:</label>
+        <input type="text" name="target" id="target" required class="w-full border border-gray-300 p-2 rounded mb-4" placeholder="https://example.com">
+        <div class="flex justify-end gap-2">
+          <button type="button" onclick="closeModal()" class="px-4 py-2 bg-gray-200 rounded">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Start Scan</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Table Section -->
+  <!-- Table Section -->
+  {% if scans %}
     <div class="overflow-x-auto mb-6">
       <table class="min-w-full bg-white shadow rounded-lg">
         <thead class="bg-gray-100">
@@ -47,13 +58,17 @@
               <td class="px-4 py-2">{{ scan.scan_type }}</td>
               <td class="px-4 py-2">{{ scan.schedule }}</td>
               <td class="px-4 py-2">
-                <div class="flex gap-1">
-                  <span class="badge bg-red-500">{{ scan.vulnerabilities.critical }}</span>
-                  <span class="badge bg-orange-400">{{ scan.vulnerabilities.high }}</span>
-                  <span class="badge bg-yellow-400">{{ scan.vulnerabilities.medium }}</span>
-                  <span class="badge bg-blue-400">{{ scan.vulnerabilities.low }}</span>
-                  <span class="badge bg-green-500">{{ scan.vulnerabilities.info }}</span>
-                </div>
+                {% if scan.status == "Completed" and scan.vuln_critical == 0 and scan.vuln_high == 0 and scan.vuln_medium == 0 and scan.vuln_low == 0 and scan.vuln_info == 0 %}
+                  <span class="text-green-600 font-semibold">No vulnerabilities found</span>
+                {% else %}
+                  <div class="flex gap-1">
+                    <span class="badge bg-red-500 text-white px-2 py-1 rounded">{{ scan.vuln_critical }}</span>
+                    <span class="badge bg-orange-400 text-white px-2 py-1 rounded">{{ scan.vuln_high }}</span>
+                    <span class="badge bg-yellow-400 text-white px-2 py-1 rounded">{{ scan.vuln_medium }}</span>
+                    <span class="badge bg-blue-400 text-white px-2 py-1 rounded">{{ scan.vuln_low }}</span>
+                    <span class="badge bg-green-500 text-white px-2 py-1 rounded">{{ scan.vuln_info }}</span>
+                  </div>
+                {% endif %}
               </td>
               <td class="px-4 py-2">{{ scan.status }}</td>
             </tr>
@@ -61,15 +76,18 @@
         </tbody>
       </table>
     </div>
+  {% else %}
+    <p class="text-gray-600 text-center mt-10">No scans have been performed yet.</p>
+  {% endif %}
 
-    <!-- Action Buttons Section -->
-    <div class="flex justify-between mb-4">
-      <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Stop Scans</button>
-      <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Delete Scans</button>
-      <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Generate Report</button>
-    </div>
-
+  <!-- Action Buttons Section -->
+  <div class="flex justify-between mb-4">
+    <button class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Stop Scans</button>
+    <button class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Delete Scans</button>
+    <button class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Generate Report</button>
   </div>
+
+</div>
 
 <script>
   function openModal() {

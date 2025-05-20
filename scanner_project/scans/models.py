@@ -15,7 +15,14 @@ class Scan(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='queued')
     created_at = models.DateTimeField(auto_now_add=True)
 
-    # Результаты
+    # Уязвимости
+    vuln_critical = models.IntegerField(default=0)
+    vuln_high = models.IntegerField(default=0)
+    vuln_medium = models.IntegerField(default=0)
+    vuln_low = models.IntegerField(default=0)
+    vuln_info = models.IntegerField(default=0)
+
+    # Дополнительные результаты
     open_ports = models.TextField(blank=True)
     sql_injection = models.BooleanField(null=True)
     xss = models.BooleanField(null=True)
@@ -25,4 +32,4 @@ class Scan(models.Model):
     error_message = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.target_url} ({self.status})"
+        return f"{self.target} ({self.status})"
